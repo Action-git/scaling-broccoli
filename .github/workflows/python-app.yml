@@ -1,4 +1,4 @@
-#name: Python Bot Deployment
+name: Python Bot Deployment
 
 on:
   push:
@@ -31,4 +31,4 @@ jobs:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}  # Set bot token via GitHub Secrets
       run: |
         chmod +x *  # Make sure the script is executable
-        python m.py # Run the bot script
+        python s.py # Run the bot script
