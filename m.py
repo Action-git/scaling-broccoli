@@ -578,7 +578,7 @@ def show_stop_action_button(message):
 
 def run_action(user_id, message, ip, port, duration):
     try:
-        numbers = [110, 180, 180, 120, 110]
+        numbers = [180, 180, 199]
         thread_value = random.choice(numbers)
         # Notify the user that the action started
         bot.reply_to(message, f"🎉 *Socket Connected in {thread_value}ms*", parse_mode='Markdown')
