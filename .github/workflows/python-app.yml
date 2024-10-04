@@ -1,4 +1,4 @@
-name: Python Bot Deployment
+#name: Python Bot Deployment
 
 on:
   push:
