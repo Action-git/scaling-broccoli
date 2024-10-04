@@ -1,5 +1,3 @@
-# .github/workflows/bot-deployment.yml
-
 name: Python Bot Deployment
 
 on:
@@ -26,11 +24,11 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytelegrambotapi pytz telebot requests # Install the dependencies
-        
+        pip install pytelegrambotapi pytz telebot requests pymongo  # Include pymongo
+
     - name: Run the bot script
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}  # Set bot token via GitHub Secrets
       run: |
         chmod +x *  # Make sure the script is executable
-        python m.py pymongo.py # Run the bot script
+        python m.py pymongo.py  # Run the bot script
