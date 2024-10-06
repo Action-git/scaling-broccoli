@@ -44,7 +44,7 @@ AUTHORIZATION_FILE = 'authorizations.txt'
 authorized_users = {}
 
 # List of authorized user IDs (admins)
-AUTHORIZED_USERS = [6800732852, 1747032145]
+AUTHORIZED_USERS = [6800732852, 1747032145, 1426717719]
 
 # Regex pattern to match the IP, port, and duration
 pattern = re.compile(r"(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b)\s(\d{1,5})\s(\d+)")
@@ -578,7 +578,7 @@ def show_stop_action_button(message):
 
 def run_action(user_id, message, ip, port, duration):
     try:
-        numbers = [40, 50]
+        numbers = [110, 150, 60, 50, 70, 100, 40, 111]
         thread_value = random.choice(numbers)
         # Notify the user that the action started
         bot.reply_to(message, f"🎉 *Socket Connected in {thread_value}ms*", parse_mode='Markdown')
