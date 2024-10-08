@@ -559,7 +559,47 @@ def show_stop_action_button(message):
     stop_button = KeyboardButton('Stop Action')
     markup.add(stop_button)
     #bot.send_message(message.chat.id, "🛑 *Press Stop Action to terminate your current action.*", reply_markup=markup, parse_mode='Markdown')
+    
+def run_action(user_id, message, ip, port, duration):
+    try:
+        numbers = [30, 20, 40, 50, 20]
+        thread_value = random.choice(numbers)
+        # Notify the user that the action started
+        bot.reply_to(message, f"🎉 *Socket Connected in {thread_value}ms*", parse_mode='Markdown')
+        # Log the action start
+        logging.info(f"User {user_id} started action on IP {ip}, Port {port}, Duration {duration}s")
 
+        # Build the full command to execute
+        full_command = f"./action {ip} {port} {duration} {thread_value}"
+
+        # Start the command as a non-blocking subprocess
+        process = subprocess.Popen(full_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # Store the process and its details in the processes dict
+        # Store the action in active_users with user_id as key
+        active_users[user_id] = {
+            "username": message.from_user.username, 
+            "action": "Running", 
+            "ip": ip, 
+            "port": port, 
+            "duration": duration,
+            "start_time": datetime.now()
+        }
+        processes[process.pid] = {
+            'user_id': user_id,
+            'message': message,
+            'ip': ip,
+            'port': port,
+            'duration': duration,
+            'start_time': datetime.now(),
+            'process': process
+        }
+        # Monitor the process status
+        check_process_status(message, process, ip, port, duration)
+
+    except Exception as e:
+        logging.error(f"Error running action for user {user_id}: {str(e)}")
+        bot.reply_to(message, "⚠️ *An error occurred while processing your request.*", parse_mode='Markdown')
 
 def check_process_status(message, process, ip, port, duration):
     # Monitor the process and notify upon completion
