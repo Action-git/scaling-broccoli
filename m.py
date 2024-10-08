@@ -61,15 +61,6 @@ supporter_users = {}
 # Store processes and temporary data for each user
 processes = defaultdict(dict)
 
-active_users[user_id] = {
-    "username": message.from_user.username, 
-    "action": "Running", 
-    "ip": ip, 
-    "port": port, 
-    "duration": duration,
-    "start_time": datetime.now()
-}
-
 # Dictionary to track actions by user
 active_users = {}  # Format: {user_id: {"username": str, "action": str, "process": subprocess, "expire_time": datetime}}
 # Authorize a user and set expiration in Kolkata timezone
