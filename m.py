@@ -253,7 +253,7 @@ def set_mode(message):
     
     # Update the user's mode
     user_modes[user_id] = selected_mode
-     bot.reply_to(message, f"🔄 *Mode switched to {selected_mode.capitalize()} Mode!*", parse_mode='Markdown')
+    bot.reply_to(message, f"🔄 *Mode switched to {selected_mode.capitalize()} Mode!*", parse_mode='Markdown')
     
 @bot.message_handler(commands=['list_active'])
 def list_active_users(message):
