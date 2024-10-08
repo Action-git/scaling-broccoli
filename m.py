@@ -471,7 +471,15 @@ def handle_message(message):
             markup = ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             stop_button = KeyboardButton('Stop Action')
             markup.add(stop_button)
-
+            # Ensure the message object is available when assigning active_users
+            active_users[user_id] = {
+                "username": message.from_user.username, 
+                "action": "Running", 
+                "ip": ip, 
+                "port": port, 
+                "duration": duration,
+                "start_time": datetime.now()
+                }
             # Respond to the user that the action is starting
             bot.reply_to(message, (
                 f"🔧 *Got it! Starting action in Auto Mode...* 💥\n\n"
@@ -576,15 +584,6 @@ def run_action(user_id, message, ip, port, duration):
         process = subprocess.Popen(full_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         # Store the process and its details in the processes dict
-        # Store the action in active_users with user_id as key
-        active_users[user_id] = {
-            "username": message.from_user.username, 
-            "action": "Running", 
-            "ip": ip, 
-            "port": port, 
-            "duration": duration,
-            "start_time": datetime.now()
-        }
         processes[process.pid] = {
             'user_id': user_id,
             'message': message,
