@@ -341,7 +341,9 @@ def remove_user(message):
         _, user_id = message.text.split()
         user_id = int(user_id)
         
-        if not in is_authorized(user_id):
+        if not is_authorized(user_id):
+            bot.reply_to(message, f"⚠️ *User {user_id} is not in the authorization list.*", parse_mode='Markdown')
+        else:
             # Remove from the authorization list
             del authorized_users[user_id]
 
@@ -356,8 +358,7 @@ def remove_user(message):
             bot.send_message(user_id, "❌ *Your access has been removed by the admin. Please contact the provider for more information.*", parse_mode='Markdown')
 
             logging.info(f"Admin {message.from_user.id} removed user {user_id}.")
-        else:
-            bot.reply_to(message, f"⚠️ *User {user_id} is not in the authorization list.*", parse_mode='Markdown')
+
 
     except ValueError:
         bot.reply_to(message, "❌ *Invalid command format!* Use `/remove <user_id>`.", parse_mode='Markdown')
