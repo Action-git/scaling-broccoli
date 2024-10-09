@@ -341,7 +341,7 @@ def remove_user(message):
         _, user_id = message.text.split()
         user_id = int(user_id)
         
-        if not is_authorized(user_id):
+        if not in is_authorized(user_id):
             # Remove from the authorization list
             del authorized_users[user_id]
 
