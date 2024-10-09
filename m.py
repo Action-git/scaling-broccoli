@@ -224,15 +224,15 @@ def send_welcome(message):
     markup.add(manual_button, auto_button)
 
     welcome_text = (
-        "👋 *Hey there! Welcome to Action Bot!*\n\n"
-        "I'm here to help you manage actions easily and efficiently. 🚀\n\n"
-        "🔹 To *start* an action, you can choose between:\n"
-        "1. Manual Mode: Enter IP, port, and duration manually.\n"
-        "2. Auto Mode: Enter IP and port, and I'll choose a random duration for you. 🎲\n\n"
-        "🔹 Want to *stop* all ongoing actions? Just type:\n"
-        "🛑 *stop all*\n\n"
-        "🔐 *Important:* Only authorized users can use this bot in private chat. 😎\n\n"
-        "🤖 _This bot was made by Ibr._"
+      "👋 *Swagat hai Tumhara Action Bot mein!*\n\n"
+      "Main yahan hoon tumhari madad karne ke liye, jaldi aur aasani se sab manage karne mein. 🚀\n\n"
+      "🔹 *Shuru karne ke liye,* tum do options mein se choose kar sakte ho:\n"
+      "1. Manual Mode: Tum IP, port, aur time do, main set kar dunga.\n"
+      "2. Auto Mode: Sirf IP aur port do, baaki sab main sambhal lunga. 🎲\n\n"
+      "🔹 Agar *sab kuch stop* karna hai, toh bas type karo:\n"
+      "🛑 *stop all*\n\n"
+      "🔐 *Dhyan rahe:* Sirf authorized users hi is bot ko private chat mein use kar sakte hain. 😎\n\n"
+      "🤖 _Yeh bot Ibr ne banaya hai, tumhari service mein._"
     )
     bot.reply_to(message, welcome_text, parse_mode='Markdown', reply_markup=markup)
 
