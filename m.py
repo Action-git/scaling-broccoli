@@ -204,7 +204,7 @@ def check_expired_users():
 
     for user in expired_users:
         user_id = user['user_id']
-        #bot.send_message(user_id, "⛔ *Your access has expired! Please renew your access.*", parse_mode='Markdown')
+        bot.send_message(user_id, "⛔ *Your access has expired! Please renew your access.*", parse_mode='Markdown')
         
         # Update user's status to 'expired' in MongoDB
         actions_collection.update_one(
@@ -341,7 +341,7 @@ def remove_user(message):
         _, user_id = message.text.split()
         user_id = int(user_id)
         
-        if user_id in authorized_users:
+        if not is_authorized(user_id):
             # Remove from the authorization list
             del authorized_users[user_id]
 
