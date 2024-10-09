@@ -359,7 +359,6 @@ def remove_user(message):
 
             logging.info(f"Admin {message.from_user.id} removed user {user_id}.")
 
-
     except ValueError:
         bot.reply_to(message, "❌ *Invalid command format!* Use `/remove <user_id>`.", parse_mode='Markdown')
 
