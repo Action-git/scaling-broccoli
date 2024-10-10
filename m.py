@@ -204,7 +204,7 @@ def check_expired_users():
 
     for user in expired_users:
         user_id = user['user_id']
-        bot.send_message(user_id, "⛔ *Your access has expired! Please renew your access.*", parse_mode='Markdown')
+        #bot.send_message(user_id, "⛔ *Your access has expired! Please renew your access.*", parse_mode='Markdown')
         
         # Update user's status to 'expired' in MongoDB
         actions_collection.update_one(
